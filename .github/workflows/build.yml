@@ -62,6 +62,14 @@ jobs:
             fi
           done
 
+      - name: Apply safe GUI compatibility fix
+        shell: bash
+        run: |
+          file="workspace/src/main/java/net/anubis/client/gui/BorderlessFullscreen.java"
+          if [ -f "$file" ]; then
+            sed -i 's/(BorderlessFullscreen.Switchable)window/(BorderlessFullscreen.Switchable)(Object)window/' "$file"
+          fi
+
       - name: Build client
         id: build
         shell: bash
