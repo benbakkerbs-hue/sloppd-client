@@ -56,7 +56,7 @@ jobs:
           echo "===== module registration references ====="
           grep -R -n -E 'AutoMineModule|AutoWalkModule|Baritone|KillAuraModule|TriggerbotModule|MaceModule|SpearLungeModule|AutoClickerModule|JumpCirclesModule|AtmosphereShaderSky|SkyMesh' workspace/src/main/java --include='*.java' | head -n 260 || true
           echo "===== likely module manager / initializer files ====="
-          find workspace/src/main/java -type f -name '*.java' | grep -Ei 'module(manager|registry)?|initializer|client(mod|main)?' | head -n 100
+          find workspace/src/main/java -type f -name '*.java' | grep -Ei 'module(manager|registry)?|initializer|client(mod|main)?' | head -n 100 || true
 
       - name: Inspect non-combat compile blockers
         shell: bash
