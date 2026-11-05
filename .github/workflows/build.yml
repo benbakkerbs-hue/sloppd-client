@@ -35,16 +35,32 @@ jobs:
         run: |
           archive="$(find . -maxdepth 1 -type f -name 'Sloppd-Client-Workspace-v4*.zip' -print -quit)"
           if [ -z "$archive" ]; then
-            echo "Upload Sloppd-Client-Workspace-v4.zip to the repository root first."
+            echo "Workspace ZIP not found."
             exit 1
           fi
           mkdir -p workspace
           unzip -q "$archive" -d workspace
           if [ ! -f workspace/build.gradle ] && [ ! -f workspace/build.gradle.kts ]; then
-            echo "The ZIP did not contain a Gradle project at its root."
-            find workspace -maxdepth 3 -type f | head -80
+            echo "Gradle project not found at workspace root."
             exit 1
           fi
+
+      - name: Inspect non-combat compile blockers
+        shell: bash
+        run: |
+          for file in \
+            src/main/java/net/anubis/client/gui/BorderlessFullscreen.java \
+            src/main/java/com/example/client/mixin/indigo/MixinAbstractTerrainRenderContext.java \
+            src/main/java/net/anubis/client/module/impl/render/SkyMesh.java \
+            src/main/java/net/anubis/client/module/impl/render/AtmosphereShaderSky.java \
+            src/main/java/net/anubis/client/module/impl/render/JumpCirclesModule.java; do
+            if [ -f "workspace/$file" ]; then
+              echo "===== $file ====="
+              sed -n '1,240p' "workspace/$file"
+            else
+              echo "===== MISSING: $file ====="
+            fi
+          done
 
       - name: Build client
         id: build
