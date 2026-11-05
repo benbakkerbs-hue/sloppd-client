@@ -5,7 +5,9 @@ on:
   push:
     branches: [main]
     paths:
+      - 'Sloppd-Client-Workspace-v4*.zip'
       - '.build-trigger'
+      - '.github/workflows/build.yml'
 
 permissions:
   contents: read
@@ -38,14 +40,35 @@ jobs:
           fi
           mkdir -p workspace
           unzip -q "$archive" -d workspace
+          if [ ! -f workspace/build.gradle ] && [ ! -f workspace/build.gradle.kts ]; then
+            echo "The ZIP did not contain a Gradle project at its root."
+            find workspace -maxdepth 3 -type f | head -80
+            exit 1
+          fi
 
       - name: Build client
-        run: gradle --no-daemon -p workspace clean build
+        id: build
+        shell: bash
+        run: |
+          set -o pipefail
+          gradle --no-daemon -p workspace clean build 2>&1 | tee build.log
 
-      - name: Upload test JAR
+      - name: Upload JAR
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Sloppd-Client-test-build
+          name: Sloppd-Client-build
           path: workspace/build/libs/*.jar
           if-no-files-found: error
+          retention-days: 14
+
+      - name: Save build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sloppd-build-diagnostics
+          path: |
+            build.log
+            workspace/build/reports/
+          if-no-files-found: ignore
           retention-days: 14
