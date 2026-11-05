@@ -45,6 +45,19 @@ jobs:
             exit 1
           fi
 
+      - name: Inspect module registration and mixin configuration
+        shell: bash
+        run: |
+          echo "===== project configuration ====="
+          sed -n '1,240p' workspace/build.gradle
+          sed -n '1,200p' workspace/src/main/resources/fabric.mod.json
+          echo "===== mixin configs ====="
+          find workspace/src/main/resources -type f -iname '*mixin*.json' -print -exec sed -n '1,240p' {} \;
+          echo "===== module registration references ====="
+          grep -R -n -E 'AutoMineModule|AutoWalkModule|Baritone|KillAuraModule|TriggerbotModule|MaceModule|SpearLungeModule|AutoClickerModule|JumpCirclesModule|AtmosphereShaderSky|SkyMesh' workspace/src/main/java --include='*.java' | head -n 260 || true
+          echo "===== likely module manager / initializer files ====="
+          find workspace/src/main/java -type f -name '*.java' | grep -Ei 'module(manager|registry)?|initializer|client(mod|main)?' | head -n 100
+
       - name: Inspect non-combat compile blockers
         shell: bash
         run: |
