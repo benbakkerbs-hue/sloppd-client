@@ -2,6 +2,10 @@ name: Build Sloppd Client
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.build-trigger'
 
 permissions:
   contents: read
@@ -29,7 +33,7 @@ jobs:
         run: |
           archive="$(find . -maxdepth 1 -type f -name 'Sloppd-Client-Workspace-v4*.zip' -print -quit)"
           if [ -z "$archive" ]; then
-            echo "Upload Sloppd-Client-Workspace-v4(1).zip to the repository root first."
+            echo "Upload Sloppd-Client-Workspace-v4.zip to the repository root first."
             exit 1
           fi
           mkdir -p workspace
