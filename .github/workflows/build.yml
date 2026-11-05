@@ -1,0 +1,47 @@
+name: Build Sloppd Client
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.4.1'
+
+      - name: Find and extract Sloppd workspace ZIP
+        shell: bash
+        run: |
+          archive="$(find . -maxdepth 1 -type f -name 'Sloppd-Client-Workspace-v4*.zip' -print -quit)"
+          if [ -z "$archive" ]; then
+            echo "Upload Sloppd-Client-Workspace-v4(1).zip to the repository root first."
+            exit 1
+          fi
+          mkdir -p workspace
+          unzip -q "$archive" -d workspace
+
+      - name: Build client
+        run: gradle --no-daemon -p workspace clean build
+
+      - name: Upload test JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sloppd-Client-test-build
+          path: workspace/build/libs/*.jar
+          if-no-files-found: error
+          retention-days: 14
